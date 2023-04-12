@@ -14,7 +14,8 @@ If the user clicks the button again, the text should change to indicate the numb
 If the user has clicked the button 3 times, the button should be disabled, and the text should change to "That's enough!"
 
 The app supports multiple languages.
-The app should also have a button in the lower left corner that toggles the language between English and Hungarian. Pressing this will change every text in the app to the other language (including button labels).
+The app should also have a button in the lower left corner that toggles the language between English and Hungarian.
+Pressing this will change every text in the app to the other language (including button labels).
 The app should launch in Hungarian.
 ```
 
