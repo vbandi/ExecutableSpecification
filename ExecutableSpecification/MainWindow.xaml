@@ -1,0 +1,31 @@
+﻿<Window x:Class="ExecutableSpecification.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Executable Specification" Height="550" Width="900" FontSize="16">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Specification of the app to be created:" Margin="8, 8" />
+        <TextBox AcceptsReturn="True" Grid.Row="1" Margin="8" x:Name="tb_Specification" TextWrapping="Wrap" xml:space="preserve">The application is called "Counter".
+The application window is resizable.
+There is a button labeled "Click Me" in the middle of the window.
+Below the button, there is a text that says "Not clicked yet"
+When the user clicks the Button, the text should change to "Clicked 1 times"
+If the user clicks the button again, the text should change to indicate the number of times the button has been clicked.
+If the user has clicked the button 3 times, the button should be disabled, and the text should change to "That's enough!"
+
+The app supports multiple languages.
+The app should also have a button in the lower left corner that toggles the language between English and Hungarian. Pressing this will change every text in the app to the other language (including button labels).
+The app should launch in Hungarian.
+        </TextBox>
+        <Button Grid.Row="2" Click="Button_Click" HorizontalAlignment="Center" Padding="10">Make it so!</Button>
+        <StatusBar Grid.Row="3" Margin="0, 10, 0, 0">
+            <TextBlock x:Name="tb_Status" Text="Ready"/>
+        </StatusBar>
+    </Grid>
+</Window>
