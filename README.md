@@ -25,6 +25,13 @@ The "app" gets created in about 10-15 seconds from scratch. Every interaction ta
 
 Note how the addition of multiple languages. If this was a real project, supporting multiple languages would triple the complexity (and cost) of this app. 
 
+## Installation / Running the app
+- Clone / download the Github repo
+- Open the solution in Visual Studio 
+- Open ```OpenAIHelper.cs```
+- Uncomment the ```GetOpenAiOptions``` method and follow the instructions to set up OpenAI or Azure service (note: GPT4 works much better).
+- Run the app and enjoy.
+
 ## Internals 
 
 Internally, the generated app follows the MVVM model, but with a twist:
