@@ -84,7 +84,7 @@ namespace ExecutableSpecification
 
             _messages.Add(new ChatMessage("user", userPrompt));
 
-            Debug.WriteLine($"USER: {userPrompt}");
+            Console.WriteLine($"USER: {userPrompt}\n");
 
             ChatCompletionCreateRequest request = new ChatCompletionCreateRequest();
             request.Messages = _messages;
@@ -95,7 +95,7 @@ namespace ExecutableSpecification
             var msg = answer.Choices[0].Message;
             _messages.Add(msg);
 
-            Debug.WriteLine($"AI: {msg.Content}");
+            Console.WriteLine($"\nAI:\n{msg.Content}\n\n");
 
             return msg.Content;
         }
