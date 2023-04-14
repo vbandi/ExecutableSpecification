@@ -23,7 +23,7 @@ The app should launch in Hungarian.
 
 The "app" gets created in about 10-15 seconds from scratch. Every interaction takes about 2 seconds to complete. 
 
-Note how the addition of multiple languages. If this was a real project, supporting multiple languages would triple the complexity (and cost) of this app. 
+Note how simple the addition of multiple languages has been. If this was a real project, supporting multiple languages would triple the complexity (and cost) of this app. 
 
 ## Installation / Running the app
 - Clone / download the Github repo
