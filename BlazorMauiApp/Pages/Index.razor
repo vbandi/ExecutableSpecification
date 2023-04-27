@@ -1,0 +1,154 @@
+﻿@page "/"
+@using Microsoft.Extensions.Configuration;
+@using System.Net.Http.Headers;
+@using Newtonsoft.Json;
+@using OpenAI.GPT3.Managers;
+@using OpenAI.GPT3.ObjectModels.RequestModels;
+@using OpenAI.GPT3.ObjectModels;
+@using System.Dynamic;
+@using OpenAI.GPT3;
+@inject IConfiguration _configuration
+<style>
+    .scrollable-textbox {
+        width: 100%;
+        height: 200px;
+        resize: none;
+        overflow: auto;
+    }
+</style>
+<textarea class="scrollable-textbox" @bind="strPrompt"></textarea>
+<br />
+<button @onclick="CallOpenAI">Make it so!</button>
+@tb_Status
+<b>@result</b>
+@code {
+    string ApiKey = "";
+    private string strPrompt = "The application contains 3 buttons";
+
+    private string tb_Status = "";
+    private string result = "";
+    private OpenAIService _service;
+    List<ChatMessage> _messages;
+
+    protected override void OnInitialized()
+    {
+        ApiKey =
+        _configuration["Settings:OpenAI_API_KEY"] ?? "";
+    }
+
+    private async Task CallOpenAI()
+    {
+        var options = new OpenAiOptions();
+        options.ApiKey = ApiKey;
+
+        _service = new(options);
+        _messages = new();
+
+        await SystemPrompt();
+    }
+
+    private async Task<dynamic> GetStateFromAI(string prompt)
+    {
+        tb_Status = "Waiting for state...";
+
+        var json = await GetAnswer(prompt);
+
+        string delimiter1 = "```";
+        string delimiter2 = "```";
+
+        json = ExtractContentBetweenDelimiters(json, delimiter1, delimiter2);
+
+        if (json == null)
+            return null;
+
+        dynamic result = JsonConvert.DeserializeObject<ExpandoObject>(json);
+        tb_Status = "";
+
+        return result;
+    }
+
+    private DateTime _lastCallTime = DateTime.MinValue;
+    private readonly TimeSpan _minimumCallInterval = TimeSpan.FromSeconds(2);
+
+    private async Task<string> GetAnswer(string userPrompt)
+    {
+        DateTime currentTime = DateTime.UtcNow;
+        TimeSpan timeSinceLastCall = currentTime - _lastCallTime;
+
+        if (timeSinceLastCall < _minimumCallInterval)
+        {
+            TimeSpan timeToWait = _minimumCallInterval - timeSinceLastCall;
+            await Task.Delay(timeToWait);
+        }
+
+        _messages.Add(new ChatMessage("user", userPrompt));
+
+        Console.WriteLine($"USER: {userPrompt}\n");
+
+        ChatCompletionCreateRequest request = new ChatCompletionCreateRequest();
+        request.Messages = _messages;
+
+        var answer = await _service.ChatCompletion.CreateCompletion(request, Models.Model.ChatGpt3_5Turbo.EnumToString());
+        _lastCallTime = DateTime.UtcNow;
+
+        var msg = answer.Choices[0].Message;
+        _messages.Add(msg);
+
+        Console.WriteLine($"\nAI:\n{msg.Content}\n\n");
+
+        return msg.Content;
+    }
+
+    private async Task SystemPrompt()
+    {
+        var systemPrompt = @"Here's a specification of a simple Blazor application.
+
+--------
+<!<!Specification!>!>
+--------
+
+The application has the following components:
+
+- The HTML code, which can not be changed while the application is running. The HTML code is in a Blazor Razor control. 
+
+- The DataContext, representing the application's state. This is a JSON data, bound to the root of the application.
+The structure of the JSON data never changes while the application is running, but it's the data itself can.
+The DataContext should include any internal state needed by the application, and anything on the UI that potentially changes while the application is running. Data will be bound to the UI without any converters. Static text should not be included in the DataContext.
+
+To display information in the application, the JSON DataContext is updated. The HTML uses data binding to display the information from the DataContext.
+
+When the HTML or JSON is requested, do not provide any explanation. Do not enclose the HTML or JSON in a Markup code block, or other characters. Just provide the raw HTML or JSON.
+
+The main loop is as follows:
+1. I will let you know if the user has interacted with the UI.
+2. You will then generate an updated JSON to reflect the application's state as it reacts to the user's input.";
+
+        systemPrompt = systemPrompt.Replace("<!<!Specification!>!>", strPrompt);
+        _messages.Add(new ChatMessage("system", systemPrompt));
+
+        tb_Status = "Preparing app (Step 1 of 2)";
+        var state = await GetStateFromAI("First, provide me with the initial state (DataContext) in JSON format.");
+
+        tb_Status = "Preparing app (Step 2 of 2)";
+        result = await GetAnswer("Next, provide me with the HTML, and only the HTML. Do not include an x:Class attribute. Include any xmlns as needed. Do NOT use any converters, event handlers, or commands.");
+    }
+
+    static string ExtractContentBetweenDelimiters(string input, string delimiter1, string delimiter2)
+    {
+        int startIndex = input.IndexOf(delimiter1);
+        if (startIndex == -1)
+        {
+            throw new ArgumentException($"Delimiter '{delimiter1}' not found.");
+        }
+
+        startIndex += delimiter1.Length;
+
+        int endIndex = input.IndexOf(delimiter2, startIndex);
+        if (endIndex == -1)
+        {
+            throw new ArgumentException($"Delimiter '{delimiter2}' not found.");
+        }
+
+        return input.Substring(startIndex, endIndex - startIndex);
+    }
+}

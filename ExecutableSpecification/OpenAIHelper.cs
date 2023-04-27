@@ -7,14 +7,14 @@ namespace ExecutableSpecification
     {
         // Uncomment this method and add your API key and other required options
 
-        /*
+        
 
         public static OpenAiOptions GetOpenAiOptions()
         {
             // --- Using OpenAI API ---
-            //var options = new OpenAiOptions();
-            //options.ApiKey = Environment.GetEnvironmentVariable("OpenAI_API_KEY");
-            //return options;
+            var options = new OpenAiOptions();
+            options.ApiKey = Environment.GetEnvironmentVariable("OpenAI_API_KEY");
+            return options;
 
             // --- Using Azure ---
             //var options = new OpenAiOptions();
@@ -27,6 +27,6 @@ namespace ExecutableSpecification
             //return options;
         }
 
-        */
+        
     }
 }
