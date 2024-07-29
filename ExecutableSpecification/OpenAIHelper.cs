@@ -1,5 +1,4 @@
 ﻿using System;
-using OpenAI.GPT3;
 
 namespace ExecutableSpecification
 {

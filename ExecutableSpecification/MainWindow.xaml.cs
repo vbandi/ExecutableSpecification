@@ -7,10 +7,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Markup;
 using Newtonsoft.Json;
-using OpenAI.GPT3;
-using OpenAI.GPT3.Managers;
-using OpenAI.GPT3.ObjectModels;
-using OpenAI.GPT3.ObjectModels.RequestModels;
+using OpenAI;
+using OpenAI.Managers;
+using OpenAI.ObjectModels;
+using OpenAI.ObjectModels.RequestModels;
 
 namespace ExecutableSpecification
 {
@@ -57,7 +57,7 @@ namespace ExecutableSpecification
         private async Task<dynamic?> GetStateFromAI(string prompt)
         {
             tb_Status.Text = "Waiting for state...";
-            var json = await GetAnswer(prompt);
+            var json = await GetAnswer(prompt, true);
 
             if (json == null)
                 return null;
@@ -69,9 +69,9 @@ namespace ExecutableSpecification
         }
 
         private DateTime _lastCallTime = DateTime.MinValue;
-        private readonly TimeSpan _minimumCallInterval = TimeSpan.FromSeconds(2);
+        private readonly TimeSpan _minimumCallInterval = TimeSpan.FromSeconds(0.01f);
 
-        private async Task<string?> GetAnswer(string userPrompt)
+        private async Task<string?> GetAnswer(string userPrompt, bool? json = null)
         {
             DateTime currentTime = DateTime.UtcNow;
             TimeSpan timeSinceLastCall = currentTime - _lastCallTime;
@@ -88,8 +88,17 @@ namespace ExecutableSpecification
 
             ChatCompletionCreateRequest request = new ChatCompletionCreateRequest();
             request.Messages = _messages;
+            request.Temperature = 0;
 
-            var answer = await _service.ChatCompletion.CreateCompletion(request, Models.Model.ChatGpt3_5Turbo.EnumToString());
+            var responseFormat = new ResponseFormat();
+
+            if (json != null)
+            {
+                responseFormat.Type = json.Value ? "json_object" : "text";
+                request.ResponseFormat = responseFormat;
+            }
+
+            var answer = await _service.ChatCompletion.CreateCompletion(request, "gpt-4o-mini");
             _lastCallTime = DateTime.UtcNow;
 
             var msg = answer.Choices[0].Message;
